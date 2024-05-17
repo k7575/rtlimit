@@ -1,8 +1,10 @@
 package rtlimit
 
 import (
-	"time"
+	"log"
+	"net/http"
 	"sync"
+	"time"
 )
 
 type LimitUnit struct {
@@ -19,6 +21,10 @@ type Limit struct {
 	lock     sync.Mutex
 }
 
+// Create new limiter
+// a: request
+// b: time duration
+// c: clean garbage timeout
 func New(a uint64, b time.Duration, c time.Duration) Limit {
 	return Limit{
 		rate:     a,
@@ -28,6 +34,35 @@ func New(a uint64, b time.Duration, c time.Duration) Limit {
 		clean:    c,
 		lock:     sync.Mutex{},
 	}
+}
+
+func Run(listen string, a uint64, b time.Duration, c time.Duration) {
+	l := New(a, b, c)
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if l.Check(r.FormValue("id")) {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	err := http.ListenAndServe(listen, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func Client(s string) bool {
+	resp, err := http.Get(s)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	if resp.StatusCode == http.StatusOK {
+		return true
+	}
+	return false
 }
 
 func (a *Limit) Check(s string) bool {
