@@ -1,9 +1,10 @@
 # Example 1
 ```
 package main
-import "rtlimit"
+
 import "time"
 import "fmt"
+import "github.com/k7575/rtlimit"
 
 func main() {
   a := rtlimit.New(5, 1*time.Second, 60*time.Second)
@@ -15,9 +16,10 @@ func main() {
 # Example 2
 ```
 package main
-import "rtlimit"
+
 import "time"
 import "fmt"
+import "github.com/k7575/rtlimit"
 
 func main() {
   go func() {
