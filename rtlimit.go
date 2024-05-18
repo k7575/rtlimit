@@ -92,13 +92,14 @@ func (a *Limit) Check(s string) bool {
 	a.lock.Unlock()
 
 	limitunit.lock.Lock()
-	if limitunit.count > 0 {
+	ttmp := t.Sub(limitunit.t)
+	if limitunit.count > 0 && ttmp < d {
 		limitunit.count--
 		limitunit.lock.Unlock()
 		return true
 	}
 
-	if t.Sub(limitunit.t) < d {
+	if ttmp < d {
 		limitunit.lock.Unlock()
 		return false
 	}
