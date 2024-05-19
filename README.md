@@ -25,6 +25,7 @@ func main() {
   go func() {
     rtlimit.Run("127.0.0.1:8080", 5, 1*time.Second, 60*time.Second)
   }()
+  time.Sleep(1 * time.Second)
 
   if rtlimit.Client("http://127.0.0.1:8080/?id=192.168.1.1") {
     fmt.Println("Ok")
